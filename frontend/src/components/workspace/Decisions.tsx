@@ -1,9 +1,9 @@
-import type { Speaker } from '@/lib/types';
+import type { Decision, Speaker } from '@/lib/types';
 import { CheckSquare, Link as LinkIcon } from 'lucide-react';
 import { formatTimestamp, getInitials, cn } from '@/lib/utils';
 
 interface DecisionsProps {
-  decisions: { text: string; importance?: string; speaker_id?: string; timestamp?: number }[];
+  decisions: (Decision | { text: string; importance?: string; speaker_id?: string | number; speaker_name?: string; timestamp?: number })[];
   speakers: Speaker[];
   onSeek: (time: number) => void;
 }
@@ -21,7 +21,11 @@ export default function Decisions({ decisions, speakers, onSeek }: DecisionsProp
   return (
     <div className="space-y-4 animate-in fade-in duration-500">
       {decisions.map((decision, i) => {
-        const speaker = speakers?.find(s => s.id === decision.speaker_id);
+        const speaker = speakers?.find(s => 
+          (decision.speaker_id !== undefined && String(s.id) === String(decision.speaker_id)) ||
+          (decision.speaker_name !== undefined && s.name === decision.speaker_name)
+        );
+        const ts = decision.timestamp;
         return (
           <div key={i} className="glass-card p-4 hover:border-primary/30 transition-colors">
             <div className="flex items-start justify-between gap-4">
@@ -54,13 +58,13 @@ export default function Decisions({ decisions, speakers, onSeek }: DecisionsProp
                   </div>
                 )}
               </div>
-              {decision.timestamp !== undefined && (
+              {ts !== undefined && (
                 <button 
-                  onClick={() => onSeek(decision.timestamp)}
+                  onClick={() => onSeek(ts)}
                   className="flex items-center gap-1 hover:text-primary transition-colors font-mono"
                 >
                   <LinkIcon className="w-3 h-3" />
-                  {formatTimestamp(decision.timestamp)}
+                  {formatTimestamp(ts)}
                 </button>
               )}
             </div>

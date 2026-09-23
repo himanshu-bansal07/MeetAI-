@@ -18,7 +18,7 @@ export default function Transcript({ segments, speakers, onSeek, currentTime = 0
   
   const speakerMap = useMemo(() => {
     const map = new Map<string, Speaker>();
-    speakers?.forEach(s => map.set(s.id, s));
+    speakers?.forEach(s => map.set(String(s.id), s));
     return map;
   }, [speakers]);
 
@@ -41,7 +41,10 @@ export default function Transcript({ segments, speakers, onSeek, currentTime = 0
         return;
       }
 
-      if (!currentGroup || currentGroup.speaker_id !== segment.speaker_id || segment.start_time - currentGroup.end_time > 30) {
+      const segSpeakerKey = segment.speaker_id !== undefined ? String(segment.speaker_id) : segment.speaker_name;
+      const groupSpeakerKey = currentGroup ? (currentGroup.speaker_id !== undefined ? String(currentGroup.speaker_id) : currentGroup.speaker_name) : null;
+
+      if (!currentGroup || groupSpeakerKey !== segSpeakerKey || segment.start_time - currentGroup.end_time > 30) {
         currentGroup = { ...segment, segments: [segment] };
         groups.push(currentGroup);
       } else {
@@ -70,7 +73,8 @@ export default function Transcript({ segments, speakers, onSeek, currentTime = 0
       
       <div className="flex-1 overflow-y-auto p-4 space-y-6" ref={scrollRef}>
         {groupedSegments.map((group, i) => {
-          const speaker = speakerMap.get(group.speaker_id);
+          const speakerKey = group.speaker_id !== undefined ? String(group.speaker_id) : '';
+          const speaker = speakerMap.get(speakerKey) || speakers?.find(s => s.name === group.speaker_name);
           const isActive = currentTime >= group.start_time && currentTime <= group.end_time;
           
           return (

@@ -1,9 +1,9 @@
-import type { Speaker } from '@/lib/types';
+import type { ActionItem, Speaker } from '@/lib/types';
 import { CheckCircle2, Circle, Clock, Link as LinkIcon } from 'lucide-react';
 import { formatTimestamp, getPriorityColor, cn } from '@/lib/utils';
 
 interface ActionItemsProps {
-  actionItems: { task: string; assignee?: string; deadline?: string; priority?: string; status?: string; timestamp?: number }[];
+  actionItems: (ActionItem | { task: string; title?: string; assignee?: string; deadline?: string; priority?: string; status?: string; timestamp?: number })[];
   speakers?: Speaker[];
   onSeek: (time: number) => void;
 }
@@ -21,7 +21,9 @@ export default function ActionItemsPanel({ actionItems, speakers, onSeek }: Acti
   return (
     <div className="space-y-4 animate-in fade-in duration-500">
       {actionItems.map((item, i) => {
-        const isDone = item.status === 'completed';
+        const isDone = item.status === 'completed' || item.status === 'done';
+        const taskText = 'task' in item && item.task ? item.task : item.title;
+        const ts = item.timestamp;
         return (
           <div key={i} className={cn(
             "glass-card p-4 transition-all",
@@ -35,7 +37,7 @@ export default function ActionItemsPanel({ actionItems, speakers, onSeek }: Acti
               <div className="flex-1 space-y-3">
                 <div>
                   <p className={cn("text-sm font-medium", isDone && "line-through text-muted-foreground")}>
-                    {item.task}
+                    {taskText}
                   </p>
                 </div>
                 
@@ -60,13 +62,13 @@ export default function ActionItemsPanel({ actionItems, speakers, onSeek }: Acti
                     </span>
                   )}
                   
-                  {item.timestamp !== undefined && (
+                  {ts !== undefined && (
                     <button 
-                      onClick={() => onSeek(item.timestamp)}
+                      onClick={() => onSeek(ts)}
                       className="ml-auto flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors font-mono"
                     >
                       <LinkIcon className="w-3 h-3" />
-                      {formatTimestamp(item.timestamp)}
+                      {formatTimestamp(ts)}
                     </button>
                   )}
                 </div>

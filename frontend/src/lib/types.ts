@@ -13,11 +13,12 @@ export interface Speaker {
 export interface TranscriptSegment {
   id: number;
   meeting_id: number;
+  speaker_id?: number | string;
   speaker_name?: string;
   text: string;
   start_time: number;
   end_time: number;
-  confidence: number;
+  confidence?: number;
 }
 
 export interface Decision {
@@ -25,18 +26,20 @@ export interface Decision {
   meeting_id: number;
   text: string;
   timestamp?: number;
+  speaker_id?: number | string;
   speaker_name?: string;
-  importance: 'low' | 'medium' | 'high';
+  importance?: 'low' | 'medium' | 'high' | string;
 }
 
 export interface ActionItem {
   id: number;
   meeting_id: number;
   title: string;
+  task?: string;
   assignee?: string;
   deadline?: string;
-  status: 'todo' | 'in_progress' | 'done';
-  priority: 'low' | 'medium' | 'high';
+  status: 'todo' | 'in_progress' | 'done' | string;
+  priority: 'low' | 'medium' | 'high' | string;
   timestamp?: number;
 }
 
@@ -108,9 +111,15 @@ export interface Task {
   updated_at?: string;
 }
 
+export type TaskUpdate = Partial<Pick<Task, 'title' | 'description' | 'assignee' | 'deadline' | 'status' | 'priority'>>;
+
 export interface AskResponse {
   answer: string;
-  sources: Array<{
+  citations?: Array<{
+    speaker: string;
+    time: number;
+  }>;
+  sources?: Array<{
     speaker?: string;
     timestamp?: number;
     text?: string;
